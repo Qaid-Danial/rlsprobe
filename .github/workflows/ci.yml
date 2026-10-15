@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Build
+        run: go build ./...
+      - name: Vet
+        run: go vet -tags integration ./...
+      - name: Unit tests
+        run: go test -race ./...
+      - name: Integration tests
+        run: go test -race -tags integration ./...
+
+lint:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-go@v7
+      with:
+        go-version-file: go.mod
+    - uses: golangci/golangci-lint-action@v9
+      with:
+        version: v2.14.0
+
+
+vuln:
+  runs-on: ubuntu-lastest
+  steps:
+    - uses: actions/checkout@7
+    - uses: actions/setup-go@v7
+      with:
+        go-version-file: go.mod
+    - name: govulncheck
+      run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+secrets:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+    - uses: gitleaks/gitleaks-action@v3
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,27 @@
+version: "2"
+
+linters:
+  enable:
+    - gosec        # security-focused lints (the linter an AppSec reviewer expects)
+    - errorlint    # wrapping errors correctly with %w and errors.Is
+    - misspell
+    - revive
+  settings:
+    errcheck:
+      # Failing to print a message to the terminal is not something we can handle.
+      exclude-functions:
+        - fmt.Fprintf
+        - fmt.Fprintln
+    revive:
+      rules:
+        - name: exported
+          disabled: true   # internal packages; doc comments on everything is noise
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+run:
+  build-tags:
+    - integration
